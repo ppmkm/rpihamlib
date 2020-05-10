@@ -106,9 +106,17 @@ public class TCPClient implements Callable<Void> {
 				} catch (ConnectException e) {
 					log.warn("cannot connect to receiver: " + e.getLocalizedMessage());
 				}finally{
+					try {
 					if (bw != null) bw.close();
+					}catch(IOException e){
+						log.warn("error closing writer", e.getLocalizedMessage());
+					}
 					bw = null;
-					if (br != null) br.close();
+					try {
+						if (br != null) br.close();
+					}catch(IOException e){
+						log.warn("error closing reader", e.getLocalizedMessage());
+					}
 					br = null;
 					nullReceived = false;
 					log.info("disconnected from " + address);
