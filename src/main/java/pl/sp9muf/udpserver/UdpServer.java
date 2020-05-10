@@ -24,6 +24,27 @@ import pl.sp9muf.udpserver.responders.EchoHamlibResponder;
 import pl.sp9muf.udpserver.responders.TsetHamlibResponder;
 import pl.sp9muf.udpserver.responders.tHamlibResponder;
 
+
+/*
+rpihamlib,  set of tools (glue) to create rigctl cotrollable  transceiver 
+from rictl controllable receiver and rpitx as transmittter
+Copyright (C) 2020 Piotr Mis
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+
 public class UdpServer implements Runnable{
 	private static final int BUFFERSIZE = 2048;
 	public final Logger log = LoggerFactory.getLogger(getClass());
