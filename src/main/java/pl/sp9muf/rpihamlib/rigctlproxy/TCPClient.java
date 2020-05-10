@@ -55,18 +55,29 @@ public class TCPClient implements Callable<Void> {
 		this.stopping = stopping;
 	}
 	
-	public synchronized String sendCmd(String cmd) throws IOException {
+	public synchronized String sendCmd(String cmd){
 		log.trace("sending: " + cmd);
+		char[] buf = new char[4096];
 		if (bw == null || bw == null){
 			throw new IllegalStateException("not connected");
 		}
-		bw.write(cmd);
-		bw.newLine();
-		bw.flush();
-		String r = br.readLine();
-		log.trace("got response: " + r);
-		if (null == r) nullReceived  = true;
-		return r;
+		try {
+			bw.write(cmd);
+			bw.newLine();
+			bw.flush();
+			int l = br.read(buf,0,buf.length);
+			String r = new String(buf,0,l);
+			log.trace("got response: " + r);
+			if (null == r) {
+				nullReceived  = true;
+				r = "RPRT -1";
+			}
+			return r;
+		} catch (IOException e) {
+			log.warn(e.getLocalizedMessage(),e);
+			nullReceived = true;
+			return "";
+		}
 	}
 
 	public TCPClient(String host, int port) {
