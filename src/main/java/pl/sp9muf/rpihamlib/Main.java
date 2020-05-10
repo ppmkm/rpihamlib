@@ -15,7 +15,7 @@ public class Main
     public static void main( String[] args )
     {
     	log.trace("starting...");
-    	Thread server = new Thread(new UdpServer("localhost",7356,10000));
+    	Thread server = new Thread(new UdpServer(args[0],Integer.parseInt(args[1]),10000));
     	server.setName("udpserver");
     	server.setDaemon(false);
     	server.start();
