@@ -36,10 +36,12 @@ public class TCPServer implements Callable<Void> {
 
 	private final Socket socket;
 	private final Logger log = LoggerFactory.getLogger(getClass());
-	private final TCPClient client; 
-	public TCPServer(Socket socket, TCPClient client) {
+	private final TCPClient client;
+	private final UDPClient rpiClient; 
+	public TCPServer(Socket socket, TCPClient client, UDPClient rpiClient) {
 		this.socket = socket;
 		this.client = client;
+		this.rpiClient = rpiClient;
 	}
 
 	@Override
@@ -64,8 +66,8 @@ public class TCPServer implements Callable<Void> {
 						break main;
 					case 't':
 					case 'T':
-						log.info("TODO call rpi");
-						//fall through
+						rsp = rpiClient.sendCmd(rigctlcmd);
+						break;
 					default:
 						rsp = client.sendCmd(rigctlcmd);
 						break;						

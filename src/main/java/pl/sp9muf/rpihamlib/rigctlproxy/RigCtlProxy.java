@@ -44,12 +44,13 @@ public class RigCtlProxy implements Runnable{
 	private volatile boolean stopping = false;
 	private final ExecutorService respondingExecutor;
 	private final String rpihost;
-	private final int rpipprt;
+	private final int rpiport;
 	private final String receiverHost;
 	private final int receiverPort;
 	private final ExecutorService servingExecutor;
 	private final ExecutorService clientExecutor;
 	private TCPClient client;
+	private UDPClient rpiClient;
 	public RigCtlProxy(String hostname, int port, int timeout, String rpihost, int rpiport, String receiverHost, int receiverPort)
 	{
 		log.info("RigCtlProxy <init> :" + hostname + ":" + port, ", timeout: " + timeout + ", rcv: " + receiverHost +":"+ receiverPort + ", rpi: " + rpihost +":"+ rpiport);
@@ -57,7 +58,7 @@ public class RigCtlProxy implements Runnable{
 		this.port = port;
 		this.timeout = timeout;
 		this.rpihost = rpihost;
-		this.rpipprt = rpiport;
+		this.rpiport = rpiport;
 		this.receiverHost = receiverHost;
 		this.receiverPort = receiverPort;
 
@@ -86,13 +87,14 @@ public class RigCtlProxy implements Runnable{
 			{
 				serversocket.setSoTimeout(timeout);
 				client = new TCPClient(receiverHost, receiverPort);
+				rpiClient = new UDPClient(rpihost,rpiport);
 				clientExecutor.submit(client);
 				while (!stopping && !Thread.interrupted())
 				{
 					try {
 					Socket socket = serversocket.accept();	
 					log.info("connection from " + socket.toString());
-					Callable<Void> call = new TCPServer(socket, client);
+					Callable<Void> call = new TCPServer(socket, client, rpiClient);
 					servingExecutor.submit(call);					
 					} catch (SocketTimeoutException e) {
 						// this is well expected
@@ -112,6 +114,11 @@ public class RigCtlProxy implements Runnable{
 		} catch (InterruptedException e) {
 			log.warn("interrupted");
 		} finally {
+			try {
+				rpiClient.close();
+			} catch (Exception e) {
+				log.error("error closing UDP client: " + e.getLocalizedMessage(),e);
+			}
 			log.info("stopped");
 		}
 		
