@@ -18,10 +18,14 @@ import com.pi4j.io.gpio.GpioPinDigitalMultipurpose;
 import com.pi4j.io.gpio.PinMode;
 import com.pi4j.io.gpio.PinPullResistance;
 import com.pi4j.io.gpio.PinState;
+import com.pi4j.io.gpio.RaspiGpioProvider;
 import com.pi4j.io.gpio.RaspiPin;
+import com.pi4j.io.gpio.RaspiPinNumberingScheme;
 
 import pl.sp9muf.rpihamlib.common.DaemonThreadFactory;
 import pl.sp9muf.rpihamlib.udpserver.responders.EchoHamlibResponder;
+import pl.sp9muf.rpihamlib.udpserver.responders.FHamlibResponder;
+import pl.sp9muf.rpihamlib.udpserver.responders.FHamlibResponder.FilterGpio;
 import pl.sp9muf.rpihamlib.udpserver.responders.TsetHamlibResponder;
 import pl.sp9muf.rpihamlib.udpserver.responders.tHamlibResponder;
 
@@ -55,7 +59,12 @@ public class UdpServer implements Runnable{
 	private volatile boolean stopping = false;
 	private final ExecutorService respondingExecutor;
 	private final GpioController gpio;
-	private final GpioPinDigitalMultipurpose pttPin;
+	private final GpioPinDigitalMultipurpose pttPin;	
+    private final FilterGpio[] filterArray = new FilterGpio[]{
+    		new FilterGpio(5_500_000L, 8200000, RaspiPin.GPIO_25), //40m)    				
+    		new FilterGpio(9_100_000L, 12100000, RaspiPin.GPIO_23), //30m)
+    		new FilterGpio(13_200_000L, 15200000, RaspiPin.GPIO_24) //20m)    				
+    };	
 	public UdpServer(String hostname, int port, int timeout)
 	{
 		log.info("UdpServer <init> :" + hostname + ":" + port, ", timeout: " + timeout);
@@ -75,10 +84,11 @@ public class UdpServer implements Runnable{
         // THIS METHOD MUST BE INVOKED BEFORE CREATING A GPIO CONTROLLER INSTANCE.
 //        GpioUtil.enableNonPrivilegedAccess();
         // create gpio controller
+		GpioFactory.setDefaultProvider(new RaspiGpioProvider(RaspiPinNumberingScheme.BROADCOM_PIN_NUMBERING));
         gpio = GpioFactory.getInstance();
         
         //provision pins
-        pttPin = gpio.provisionDigitalMultipurposePin(RaspiPin.GPIO_00, PinMode.DIGITAL_OUTPUT, PinPullResistance.OFF);
+        pttPin = gpio.provisionDigitalMultipurposePin(RaspiPin.GPIO_17, PinMode.DIGITAL_OUTPUT, PinPullResistance.OFF);
         pttPin.setShutdownOptions(true, PinState.LOW, PinPullResistance.PULL_DOWN);
         
         
@@ -116,6 +126,9 @@ public class UdpServer implements Runnable{
 							break;
 						case 'T':
 							call = new TsetHamlibResponder(dgramsocket,packet,pttPin);
+							break;
+						case 'F':
+							call = new FHamlibResponder(dgramsocket,packet,filterArray);
 							break;
 						default:
 							call = new EchoHamlibResponder(dgramsocket, packet);

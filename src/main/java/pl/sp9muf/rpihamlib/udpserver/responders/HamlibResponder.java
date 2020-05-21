@@ -42,9 +42,13 @@ public abstract class HamlibResponder implements Callable<Void> {
 	@Override
 	public Void call() throws Exception {
 		byte [] response = processHamlibCmd(packet.getData(),packet.getOffset(),packet.getLength());
-		DatagramPacket responsePacket = new DatagramPacket(response,response.length,packet.getSocketAddress());
-		respSocket.send(responsePacket);
-		log.trace(" response sent to " + packet.getSocketAddress());
+		if (response != null) {
+			DatagramPacket responsePacket = new DatagramPacket(response,response.length,packet.getSocketAddress());
+			respSocket.send(responsePacket);
+			log.trace(" response sent to " + packet.getSocketAddress());
+		} else {
+			log.trace("null response, not sending back");
+		}
 		return null;
 	}
 

@@ -68,6 +68,10 @@ public class TCPServer implements Callable<Void> {
 					case 'T':
 						rsp = rpiClient.sendCmd(rigctlcmd);
 						break;
+					case 'F':
+						rsp = client.sendCmd(rigctlcmd);
+						rpiClient.sendCmd(rigctlcmd);
+						break;						
 					default:
 						rsp = client.sendCmd(rigctlcmd);
 						break;						
