@@ -1,8 +1,11 @@
-package pl.sp9muf.udpserver.responders;
-
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.util.Arrays;
+/**
+ * 
+ */
+/**
+ * @author piotr
+ *
+ */
+package pl.sp9muf.rpihamlib.udpserver.responders;
 
 /*
 rpihamlib,  set of tools (glue) to create rigctl cotrollable  transceiver 
@@ -22,20 +25,3 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
-
-public class EchoHamlibResponder extends HamlibResponder {
-
-
-	public EchoHamlibResponder(DatagramSocket respSocket, DatagramPacket packet) {
-		super(respSocket, packet);
-	}
-
-	@Override
-	byte[] processHamlibCmd(byte[] data, int offset, int length) {
-		byte[] response = Arrays.copyOfRange(data, offset, offset + length); 
-		log.trace("echoing...." + new String(response));
-		return response;
-	}
-
-}

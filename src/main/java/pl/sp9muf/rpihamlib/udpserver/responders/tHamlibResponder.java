@@ -1,9 +1,10 @@
-package pl.sp9muf.udpserver.responders;
+package pl.sp9muf.rpihamlib.udpserver.responders;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 
 import com.pi4j.io.gpio.GpioPinDigitalMultipurpose;
+import com.pi4j.io.gpio.PinState;
 
 /*
 rpihamlib,  set of tools (glue) to create rigctl cotrollable  transceiver 
@@ -24,37 +25,23 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
-public class TsetHamlibResponder extends HamlibResponder {
+public class tHamlibResponder extends HamlibResponder {
 
 	private final GpioPinDigitalMultipurpose pttPin;
 
-	public TsetHamlibResponder(DatagramSocket respSocket, DatagramPacket packet, GpioPinDigitalMultipurpose pttPin) {
+	public tHamlibResponder(DatagramSocket respSocket, DatagramPacket packet, GpioPinDigitalMultipurpose pttPin) {
 		super(respSocket, packet);
 		this.pttPin = pttPin;
 	}
 
 	@Override
 	byte[] processHamlibCmd(byte[] data, int offset, int length) {
-		String cmd = new String(data,offset,length);
-		log.debug("processing: " + cmd);
-		byte [] response = "RPRT 0\n".getBytes();
-		switch (cmd.trim())
-		{
-			case "T 0": 
-				log.debug("PTT off");
-				pttPin.setState(false);
-				break;
-			case "T 1": 
-			case "T 2": 
-			case "T 3": 
-				log.debug("PTT on");
-				pttPin.setState(true);
-				break;
-			default:
-				log.error("cmd rejected: " + cmd.trim());
-				response = "RPRT -1\n".getBytes();
-		}
+		log.debug("processing: " + new String(data,offset,length));
+		if (data[0] != 't') return "RPRT 1".getBytes();
+		PinState pttState = pttPin.getState();
+		byte[] response = new byte[2];
+		response[0] = pttState == PinState.LOW ? (byte)'0':(byte)'1';
+		response[1] = '\n';
 		return response;		
 		
 	}

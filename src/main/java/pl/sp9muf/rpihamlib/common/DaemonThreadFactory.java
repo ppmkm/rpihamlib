@@ -1,4 +1,4 @@
-package pl.sp9muf.udpserver;
+package pl.sp9muf.rpihamlib.common;
 
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;

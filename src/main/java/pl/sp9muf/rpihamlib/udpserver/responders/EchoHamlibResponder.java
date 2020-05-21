@@ -1,10 +1,8 @@
-package pl.sp9muf.udpserver.responders;
+package pl.sp9muf.rpihamlib.udpserver.responders;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-
-import com.pi4j.io.gpio.GpioPinDigitalMultipurpose;
-import com.pi4j.io.gpio.PinState;
+import java.util.Arrays;
 
 /*
 rpihamlib,  set of tools (glue) to create rigctl cotrollable  transceiver 
@@ -25,25 +23,19 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-public class tHamlibResponder extends HamlibResponder {
 
-	private final GpioPinDigitalMultipurpose pttPin;
+public class EchoHamlibResponder extends HamlibResponder {
 
-	public tHamlibResponder(DatagramSocket respSocket, DatagramPacket packet, GpioPinDigitalMultipurpose pttPin) {
+
+	public EchoHamlibResponder(DatagramSocket respSocket, DatagramPacket packet) {
 		super(respSocket, packet);
-		this.pttPin = pttPin;
 	}
 
 	@Override
 	byte[] processHamlibCmd(byte[] data, int offset, int length) {
-		log.debug("processing: " + new String(data,offset,length));
-		if (data[0] != 't') return "RPRT 1".getBytes();
-		PinState pttState = pttPin.getState();
-		byte[] response = new byte[2];
-		response[0] = pttState == PinState.LOW ? (byte)'0':(byte)'1';
-		response[1] = '\n';
-		return response;		
-		
+		byte[] response = Arrays.copyOfRange(data, offset, offset + length); 
+		log.trace("echoing...." + new String(response));
+		return response;
 	}
 
 }

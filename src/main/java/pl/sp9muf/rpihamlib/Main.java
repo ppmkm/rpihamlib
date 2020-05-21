@@ -3,7 +3,8 @@ package pl.sp9muf.rpihamlib;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import pl.sp9muf.udpserver.UdpServer;
+import pl.sp9muf.rpihamlib.rigctlproxy.RigCtlProxy;
+import pl.sp9muf.rpihamlib.udpserver.UdpServer;
 
 
 /*
@@ -36,9 +37,26 @@ public class Main
     public static void main( String[] args )
     {
     	log.trace("starting...");
-    	Thread server = new Thread(new UdpServer(args[0],Integer.parseInt(args[1]),10000));
-    	server.setName("udpserver");
-    	server.setDaemon(false);
-    	server.start();
+    	switch (args[0]){
+    	case "udpserver":
+        	Thread server = new Thread(new UdpServer(args[1],Integer.parseInt(args[2]),10000));
+        	server.setName("udpserver");
+        	server.setDaemon(false);
+        	server.start();
+        	break;
+    	case "rigctlproxy":
+        	server = new Thread(new RigCtlProxy(args[1],Integer.parseInt(args[2]),10000, args[3] , Integer.parseInt(args[4]), args[5],Integer.parseInt(args[6])));
+        	server.setName("rigctlproxyr");
+        	server.setDaemon(false);
+        	server.start();
+        	break;
+        default:
+        	printUsage();
+        	break;
+    	}
     }
+	private static void printUsage() {
+		// TODO Auto-generated method stub
+		
+	}
 }

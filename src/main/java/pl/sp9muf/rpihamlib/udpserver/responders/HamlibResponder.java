@@ -1,4 +1,4 @@
-package pl.sp9muf.udpserver.responders;
+package pl.sp9muf.rpihamlib.udpserver.responders;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
