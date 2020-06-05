@@ -59,15 +59,20 @@ public class TCPClient implements Callable<Void> {
 		log.trace("sending: " + cmd);
 		char[] buf = new char[4096];
 		if (bw == null || bw == null){
-			throw new IllegalStateException("not connected");
+			log.warn("client not connected");
+			nullReceived  = true;
+			return "RPRT -1";			
 		}
 		try {
 			bw.write(cmd);
 			bw.newLine();
 			bw.flush();
 			int l = br.read(buf,0,buf.length);
-			String r = new String(buf,0,l);
-			log.trace("got response: " + r);
+			String r = null; 
+			if (l>=0) {
+			    r = new String(buf,0,l);
+			    log.trace("got response: " + r);
+			}
 			if (null == r) {
 				nullReceived  = true;
 				r = "RPRT -1";
@@ -92,6 +97,7 @@ public class TCPClient implements Callable<Void> {
 			while (!Thread.interrupted() && !stopping)
 			{
 				try(Socket socket = new Socket(address.getAddress(),address.getPort())){
+					socket.setSoTimeout(500);
 					bw = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
 					br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 					log.info("connected to " + address);

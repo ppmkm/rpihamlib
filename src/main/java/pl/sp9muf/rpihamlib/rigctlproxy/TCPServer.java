@@ -38,6 +38,41 @@ public class TCPServer implements Callable<Void> {
 	private final Logger log = LoggerFactory.getLogger(getClass());
 	private final TCPClient client;
 	private final UDPClient rpiClient; 
+	private static final String gqrx_dump_state_response =
+					"0\n" 
+					+ "2\n"
+					+ "1\n"
+					+"0.000000 10000000000.000000 0xef -1 -1 0x1 0x0\n"
+					+"0 0 0 0 0 0 0\n"
+					+"0 0 0 0 0 0 0\n"
+					+"0xef 1\n"
+					+"0xef 0\n"
+					+"0 0\n"
+					+"0x82 500\n"
+					+"0x82 200\n"
+					+"0x82 2000\n"
+					+"0x21 10000\n"
+					+"0x21 5000\n"
+					+"0x21 20000\n"
+					+"0x0c 2700\n"
+					+"0x0c 1400\n"
+					+"0x0c 3900\n"
+					+"0x40 160000\n"
+					+"0x40 120000\n"
+					+"0x40 200000\n"
+					+"0 0\n"
+					+"0\n"
+					+"0\n"
+					+"0\n"
+					+"0\n"
+					+"0\n"
+					+"0\n"
+					+"0\n"
+					+"0\n"
+					+"0x40000020\n"
+					+"0x20\n"
+					+"0\n"
+					+"0\n";
 	public TCPServer(Socket socket, TCPClient client, UDPClient rpiClient) {
 		this.socket = socket;
 		this.client = client;
@@ -70,8 +105,20 @@ public class TCPServer implements Callable<Void> {
 						break;
 					case 'F':
 						rsp = client.sendCmd(rigctlcmd);
-						rpiClient.sendCmd(rigctlcmd);
-						break;						
+						rpiClient.issueCmd(rigctlcmd);
+						break;
+					case 'f':
+						rsp = client.sendCmd(rigctlcmd);
+						rpiClient.issueCmd("F " + rsp);
+						break;
+					case '\\':
+						if (rigctlcmd.contains("dump_state")){
+							rsp = gqrx_dump_state_response;
+							log.info("sending fixed dump_state");
+							break;
+						} else {
+							//fall through to receiver
+						}
 					default:
 						rsp = client.sendCmd(rigctlcmd);
 						break;						
@@ -81,8 +128,10 @@ public class TCPServer implements Callable<Void> {
 					bw.flush();
 				} catch (SocketTimeoutException e) {
 					log.trace("u");
+				} catch (Exception e) {
+					log.error("after sendcmd: " + e.getLocalizedMessage(),e);
+					throw e;
 				}
-				
 			}
 			return null;
 		} finally {

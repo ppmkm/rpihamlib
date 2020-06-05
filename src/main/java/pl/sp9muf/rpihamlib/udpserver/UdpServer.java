@@ -108,7 +108,8 @@ public class UdpServer implements Runnable{
 	public void run() {
 		try {
 			log.info("starting");
-			try( DatagramSocket dgramsocket = new DatagramSocket(new InetSocketAddress(hostname,port)))
+			try( DatagramSocket dgramsocket = new DatagramSocket(new InetSocketAddress(hostname,port));
+				 DatagramSocket sendiqsocket = new DatagramSocket())
 			{
 				dgramsocket.setSoTimeout(timeout);
 				while (!stopping && !Thread.interrupted())
@@ -128,7 +129,7 @@ public class UdpServer implements Runnable{
 							call = new TsetHamlibResponder(dgramsocket,packet,pttPin);
 							break;
 						case 'F':
-							call = new FHamlibResponder(dgramsocket,packet,filterArray);
+							call = new FHamlibResponder(dgramsocket,packet,filterArray, sendiqsocket);
 							break;
 						default:
 							call = new EchoHamlibResponder(dgramsocket, packet);
