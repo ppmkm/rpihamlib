@@ -45,7 +45,7 @@ public class Main
         	server.start();
         	break;
     	case "rigctlproxy":
-        	server = new Thread(new RigCtlProxy(args[1],Integer.parseInt(args[2]),10000, args[3] , Integer.parseInt(args[4]), args[5],Integer.parseInt(args[6])));
+        	server = new Thread(new RigCtlProxy(args[1],Integer.parseInt(args[2]),3000, args[3] , Integer.parseInt(args[4]), args[5],Integer.parseInt(args[6])));
         	server.setName("rigctlproxyr");
         	server.setDaemon(false);
         	server.start();

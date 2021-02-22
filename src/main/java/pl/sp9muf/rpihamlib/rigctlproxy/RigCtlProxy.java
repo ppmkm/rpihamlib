@@ -99,6 +99,14 @@ public class RigCtlProxy implements Runnable{
 					} catch (SocketTimeoutException e) {
 						// this is well expected
 						log.trace("u");
+						String rsp = client.sendCmd("f");
+						try {
+							double freq = Double.parseDouble(rsp);
+							log.trace("got frequency: " + freq );
+							rpiClient.issueCmd("F " + rsp);													
+						} catch (NumberFormatException e1) {
+							log.warn("failure determining frequency: " + rsp);
+						}
 					}
 					
 				}
@@ -128,7 +136,7 @@ public class RigCtlProxy implements Runnable{
     public static void main( String[] args )
     {
     	log.trace("starting...");
-    	Thread server = new Thread(new RigCtlProxy(args[0],Integer.parseInt(args[1]),10000, args[2] , Integer.parseInt(args[3]), args[4],Integer.parseInt(args[5])));
+    	Thread server = new Thread(new RigCtlProxy(args[0],Integer.parseInt(args[1]),3000, args[2] , Integer.parseInt(args[3]), args[4],Integer.parseInt(args[5])));
     	server.setName("rigctlproxyr");
     	server.setDaemon(false);
     	server.start();
